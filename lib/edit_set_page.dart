@@ -166,58 +166,62 @@ class EditSetPageState extends State<EditSetPage> {
   Future<void> _displayTextInputDialog(BuildContext context) async {
     _textFieldController.clear();
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('New Entry'),
-            content: TextField(
-                expands: false,
-                maxLines: null,
-                keyboardType: TextInputType.text,
-                controller: _textFieldController,
-                decoration: const InputDecoration(hintText: "Enter new Entry"),
-                onEditingComplete: () {
-                  setState(() {
-                    _newEntryName = _textFieldController.value.text.trim();
-                    if (_newEntryName.isNotEmpty) {
-                      for (String entry in _newEntryName.split("\n")) {
-                        entry = entry.trim();
-                        if (entry.isNotEmpty) _addTile(entry);
-                      }
-                    }
-                    Navigator.pop(context);
-                    sc.animateTo(sc.position.maxScrollExtent,
-                        duration: Duration(seconds: 2), curve: Curves.ease);
-                  });
-                }),
-            actions: <Widget>[
-              TextButton(
-                child: const Text('Cancel'),
-                onPressed: () {
-                  setState(() {
-                    Navigator.pop(context);
-                  });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('New Entry'),
+          content: TextField(
+            expands: false,
+            maxLines: null,
+            keyboardType: TextInputType.text,
+            controller: _textFieldController,
+            decoration: const InputDecoration(hintText: "Enter new Entry"),
+            onEditingComplete: () {
+              setState(
+                () {
+                  _addEntry();
+                  Navigator.of(context).pop();
                 },
-              ),
-              TextButton(
-                child: const Text('Ok'),
-                onPressed: () {
-                  setState(() {
-                    _newEntryName = _textFieldController.value.text.trim();
-                    if (_newEntryName.isNotEmpty) {
-                      for (String entry in _newEntryName.split("\n")) {
-                        entry = entry.trim();
-                        if (entry.isNotEmpty) _addTile(entry);
-                      }
-                    }
-                    sc.animateTo(sc.position.maxScrollExtent,
-                        duration: Duration(seconds: 2), curve: Curves.ease);
+              );
+            },
+          ),
+          actions: <Widget>[
+            TextButton(
+              child: const Text('Cancel'),
+              onPressed: () {
+                setState(
+                  () {
                     Navigator.pop(context);
-                  });
-                },
-              ),
-            ],
-          );
-        });
+                  },
+                );
+              },
+            ),
+            TextButton(
+              child: const Text('Ok'),
+              onPressed: () {
+                setState(
+                  () {
+                    _addEntry();
+                    Navigator.of(context).pop();
+                  },
+                );
+              },
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  _addEntry() {
+    String text = _textFieldController.value.text.trim();
+    if (text.isNotEmpty) {
+      for (String entry in text.split("\n")) {
+        entry = entry.trim();
+        if (entry.isNotEmpty) _addTile(entry);
+      }
+    }
+    sc.animateTo(sc.position.maxScrollExtent,
+        duration: const Duration(seconds: 2), curve: Curves.ease);
   }
 }
