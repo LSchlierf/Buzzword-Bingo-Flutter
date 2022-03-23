@@ -2,16 +2,24 @@ import 'package:buzzword_bingo/main_page.dart';
 import 'package:flutter/material.dart';
 
 void main() {
-  runApp(const BingoApp());
+  runApp(BingoApp());
 }
 
 class BingoApp extends StatelessWidget {
-  const BingoApp({Key? key}) : super(key: key);
+  BingoApp({Key? key}) : super(key: key);
+  final ThemeData theme = ThemeData(
+    brightness: Brightness.dark,
+  );
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
       title: 'Buzzword Bingo',
-      theme: ThemeData.dark(),
+      theme: theme.copyWith(
+        colorScheme: theme.colorScheme.copyWith(
+          brightness: Brightness.dark,
+          secondary: Colors.blue,
+        ),
+      ),
       home: MainPage(
         key: key,
         title: 'Buzzword Bingo',
