@@ -52,7 +52,7 @@ class BingoCard {
   }
 
   int size() {
-    return tiles == null ? 0 : tiles.length;
+    return tiles.length;
   }
 
   List<BingoTile> toList() {
