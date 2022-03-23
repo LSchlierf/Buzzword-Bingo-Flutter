@@ -45,99 +45,95 @@ class CardConfigPageState extends State<CardConfigPage> {
         title: Text(widget.cardName),
         centerTitle: true,
       ),
-      body: Column(
-        mainAxisAlignment: MainAxisAlignment.start,
-        children: [
-          // Expanded(
-          // child:
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text(
-                'Available entries: ${widget.entries.length}',
-                style: const TextStyle(fontSize: 20),
-              ),
-            ),
-          ),
-          // ),
-          // Expanded(
-          // child:
-          Center(
-            child: Padding(
-              padding: const EdgeInsets.all(10),
-              child: Text(
-                'Maximum size: ${_isDifferent ? '${_maxSizeWithoutFree}x$_maxSizeWithoutFree, or ${_maxSizeWithFree}x$_maxSizeWithFree with a free field in the middle.' : '${_maxSizeWithoutFree}x$_maxSizeWithoutFree'}',
-                style: const TextStyle(fontSize: 20),
-              ),
-            ),
-          ),
-          // ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  'Use free field',
-                  style: TextStyle(fontSize: 20),
+      body: SingleChildScrollView(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.start,
+          children: [
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  'Available entries: ${widget.entries.length}',
+                  style: const TextStyle(fontSize: 20),
                 ),
-                Checkbox(
-                    activeColor: Colors.blue,
-                    value: _useFreeField,
-                    onChanged: (newValue) {
+              ),
+            ),
+            Center(
+              child: Padding(
+                padding: const EdgeInsets.all(10),
+                child: Text(
+                  'Maximum size: ${_isDifferent ? '${_maxSizeWithoutFree}x$_maxSizeWithoutFree, or ${_maxSizeWithFree}x$_maxSizeWithFree with a free field in the middle.' : '${_maxSizeWithoutFree}x$_maxSizeWithoutFree'}',
+                  style: const TextStyle(fontSize: 20),
+                ),
+              ),
+            ),
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    'Use free field',
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  Checkbox(
+                      activeColor: Colors.blue,
+                      value: _useFreeField,
+                      onChanged: (newValue) {
+                        setState(() {
+                          _useFreeField = newValue!;
+                          if (!_useFreeField &&
+                                  _isDifferent &&
+                                  _selectedSize == _maxSizeWithFree ||
+                              _selectedSize.isEven) {
+                            _selectedSize--;
+                          }
+                        });
+                      }),
+                ],
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  const Text(
+                    "Size",
+                    style: TextStyle(fontSize: 20),
+                  ),
+                  DropdownButton(
+                    value: _selectedSize,
+                    onChanged: (int? value) {
                       setState(() {
-                        _useFreeField = newValue!;
-                        if (!_useFreeField &&
-                                _isDifferent &&
-                                _selectedSize == _maxSizeWithFree ||
-                            _selectedSize.isEven) {
-                          _selectedSize--;
+                        _selectedSize = value!;
+                        if (_isDifferent && _selectedSize == _maxSizeWithFree) {
+                          _useFreeField = true;
                         }
+                        if (_selectedSize.isEven) _useFreeField = false;
                       });
-                    }),
-              ],
+                    },
+                    items: List.generate(
+                            _maxSizeWithFree - 2, (index) => index + 3)
+                        .map<DropdownMenuItem<int>>((int value) {
+                      return DropdownMenuItem<int>(
+                          value: value, child: Text(value.toString()));
+                    }).toList(), //maxSizeWithFreeField
+                  ),
+                ],
+              ),
             ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                const Text(
-                  "Size",
-                  style: TextStyle(fontSize: 20),
-                ),
-                DropdownButton(
-                  value: _selectedSize,
-                  onChanged: (int? value) {
-                    setState(() {
-                      _selectedSize = value!;
-                      if (_isDifferent && _selectedSize == _maxSizeWithFree) {
-                        _useFreeField = true;
-                      }
-                      if (_selectedSize.isEven) _useFreeField = false;
-                    });
-                  },
-                  items:
-                      List.generate(_maxSizeWithFree - 2, (index) => index + 3)
-                          .map<DropdownMenuItem<int>>((int value) {
-                    return DropdownMenuItem<int>(
-                        value: value, child: Text(value.toString()));
-                  }).toList(), //maxSizeWithFreeField
-                ),
-              ],
-            ),
-          ),
-          const Divider(),
-          Padding(
-            padding: const EdgeInsets.all(10),
-            child: ElevatedButton(
-              child: const Text('Let\'s go!'),
-              onPressed: () => _startGame(),
-            ),
-          )
-        ],
+            const Divider(),
+            Padding(
+              padding: const EdgeInsets.all(10),
+              child: ElevatedButton(
+                child: const Text('Let\'s go!'),
+                onPressed: () => _startGame(),
+              ),
+            )
+          ],
+        ),
       ),
     );
   }
