@@ -1,5 +1,6 @@
 import 'package:buzzword_bingo/bingo_sets.dart';
 import 'package:buzzword_bingo/card_config_page.dart';
+import 'package:buzzword_bingo/imprint.dart';
 import 'package:flutter/material.dart';
 import 'dart:math';
 
@@ -29,6 +30,14 @@ class MainPageState extends State<MainPage> {
   Widget build(BuildContext context) {
     return Scaffold(
         appBar: AppBar(
+          leading: IconButton(
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute(
+                builder: (context) => const Imprint(),
+              ),
+            ),
+            icon: const Icon(Icons.info_outline),
+          ),
           title: Text(widget.title),
           centerTitle: true,
           actions: [
