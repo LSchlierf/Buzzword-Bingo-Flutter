@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:buzzword_bingo/free_bingo_tile.dart';
 import 'package:flutter/material.dart';
 import 'bingo_card.dart';
@@ -16,6 +18,7 @@ class BingoPage extends StatefulWidget {
 
 class BingoPageState extends State<BingoPage> {
   List<BingoTile> tiles = List.empty(growable: true);
+  double tileWidth = 0;
 
   @override
   initState() {
@@ -25,6 +28,9 @@ class BingoPageState extends State<BingoPage> {
 
   @override
   Widget build(BuildContext context) {
+    tileWidth = min(MediaQuery.of(context).size.width.toInt(),
+            MediaQuery.of(context).size.height.toInt()) /
+        widget.card.size();
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.setName} Bingo'),
@@ -42,9 +48,7 @@ class BingoPageState extends State<BingoPage> {
             );
           }
           if (index == widget.card.size()) {
-            return const Padding(
-              padding: EdgeInsets.all(20),
-            );
+            return const Divider();
           }
           return const Center(
             child: Text(
@@ -57,8 +61,8 @@ class BingoPageState extends State<BingoPage> {
     );
   }
 
-  List<Container> _makeContainerList(List<BingoTile> tiles) {
-    List<Container> result = List.empty(growable: true);
+  List<Widget> _makeContainerList(List<BingoTile> tiles) {
+    List<Widget> result = List.empty(growable: true);
     for (BingoTile tile in tiles) {
       if (tile is FreeBingoTile) {
         result.add(
@@ -69,40 +73,36 @@ class BingoPageState extends State<BingoPage> {
                 color: Colors.black,
               ),
             ),
-            width: MediaQuery.of(context).size.width / widget.card.size(),
-            height: MediaQuery.of(context).size.width / widget.card.size(),
+            width: tileWidth,
+            height: tileWidth,
             child: Icon(
               Icons.star,
-              size:
-                  MediaQuery.of(context).size.width / (2 * widget.card.size()),
+              size: tileWidth / 2,
             ),
           ),
         );
       } else {
         result.add(
-          Container(
-            child: GestureDetector(
-              onTap: () {
-                setState(() {
-                  tile.isMarkedOff = !tile.isMarkedOff;
-                });
-              },
-              child: Container(
-                decoration: BoxDecoration(
-                  color: (tile.isMarkedOff ? Colors.green : null),
-                  border: Border.all(
-                    color: Colors.black,
-                  ),
+          GestureDetector(
+            onTap: () {
+              setState(() {
+                tile.isMarkedOff = !tile.isMarkedOff;
+              });
+            },
+            child: Container(
+              decoration: BoxDecoration(
+                color: (tile.isMarkedOff ? Colors.green : null),
+                border: Border.all(
+                  color: Colors.black,
                 ),
-                width: MediaQuery.of(context).size.width / widget.card.size(),
-                height: MediaQuery.of(context).size.width / widget.card.size(),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                  child: Center(
-                    child: Text(
-                      tile.text,
-                      // style: const TextStyle(fontSize: 15),
-                    ),
+              ),
+              width: tileWidth,
+              height: tileWidth,
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+                child: Center(
+                  child: Text(
+                    tile.text,
                   ),
                 ),
               ),

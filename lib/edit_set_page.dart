@@ -24,8 +24,7 @@ class EditSetPageState extends State<EditSetPage> {
   final TextEditingController _textFieldController = TextEditingController();
   bool _isTitle = false;
   bool anyChange = false;
-  String _newEntryName = '';
-  final List<Container> _entries = List.empty(growable: true);
+  final List<Widget> _entries = List.empty(growable: true);
   final List<String> _entryTexts = List.empty(growable: true);
   final List<int> _entryIDs = List.empty(growable: true);
   String? _newSetName;
@@ -116,7 +115,7 @@ class EditSetPageState extends State<EditSetPage> {
 
   void _addTile(String text) {
     setState(() {
-      Container tile = _makeEntryTile(text, _tileID);
+      Widget tile = _makeEntryTile(text, _tileID);
       _entries.add(tile);
       _entryIDs.add(_tileID);
       _entryTexts.add(text);
@@ -141,24 +140,21 @@ class EditSetPageState extends State<EditSetPage> {
     });
   }
 
-  Container _makeEntryTile(String text, int id) {
-    return Container(
-      child: GestureDetector(
-        onLongPress: () => _removeTile(id),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Expanded(
-              child: Text(
-                text,
-                textAlign: TextAlign.left,
-              ),
+  Widget _makeEntryTile(String text, int id) {
+    return GestureDetector(
+      onLongPress: () => _removeTile(id),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Expanded(
+            child: Text(
+              text,
+              textAlign: TextAlign.left,
             ),
-            IconButton(
-                onPressed: () => _removeTile(id),
-                icon: const Icon(Icons.delete))
-          ],
-        ),
+          ),
+          IconButton(
+              onPressed: () => _removeTile(id), icon: const Icon(Icons.delete))
+        ],
       ),
     );
   }
