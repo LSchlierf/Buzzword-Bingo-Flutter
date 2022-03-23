@@ -171,6 +171,7 @@ class EditSetPageState extends State<EditSetPage> {
         return AlertDialog(
           title: const Text('New Entry'),
           content: TextField(
+            autofocus: true,
             expands: false,
             maxLines: null,
             keyboardType: TextInputType.text,
