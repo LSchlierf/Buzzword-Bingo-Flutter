@@ -30,6 +30,7 @@ class EditSetPageState extends State<EditSetPage> {
   final List<int> _entryIDs = List.empty(growable: true);
   String? _newSetName;
   int _tileID = 0;
+  ScrollController sc = ScrollController();
 
   @override
   void initState() {
@@ -84,6 +85,7 @@ class EditSetPageState extends State<EditSetPage> {
       ),
       body: Center(
         child: ListView.builder(
+          controller: sc,
           padding: const EdgeInsets.all(15),
           itemCount: max(_entries.length * 2, 1),
           itemBuilder: (context, index) {
@@ -184,6 +186,8 @@ class EditSetPageState extends State<EditSetPage> {
                       }
                     }
                     Navigator.pop(context);
+                    sc.animateTo(sc.position.maxScrollExtent,
+                        duration: Duration(seconds: 2), curve: Curves.ease);
                   });
                 }),
             actions: <Widget>[
@@ -206,6 +210,8 @@ class EditSetPageState extends State<EditSetPage> {
                         if (entry.isNotEmpty) _addTile(entry);
                       }
                     }
+                    sc.animateTo(sc.position.maxScrollExtent,
+                        duration: Duration(seconds: 2), curve: Curves.ease);
                     Navigator.pop(context);
                   });
                 },
