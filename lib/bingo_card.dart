@@ -1,9 +1,7 @@
 import 'dart:math';
 
-import 'package:buzzword_bingo/bingo_sets.dart';
 import 'package:buzzword_bingo/bingo_tile.dart';
 import 'package:buzzword_bingo/free_bingo_tile.dart';
-import 'package:flutter/cupertino.dart';
 
 class BingoCard {
   List<List<BingoTile>> tiles;
@@ -55,18 +53,6 @@ class BingoCard {
 
   int size() {
     return tiles == null ? 0 : tiles.length;
-  }
-
-  List<Container> toContainerList() {
-    List<Container> result = List.empty(growable: true);
-    if (tiles != null) {
-      for (List list in tiles) {
-        for (BingoTile tile in list) {
-          result.add(tile.getDisplayTile());
-        }
-      }
-    }
-    return result;
   }
 
   List<BingoTile> toList() {
