@@ -6,11 +6,15 @@ import 'package:flutter/material.dart';
 
 class CardConfigPage extends StatefulWidget {
   const CardConfigPage(
-      {Key? key, required this.cardName, required this.entries})
+      {Key? key,
+      required this.cardName,
+      required this.entries,
+      required this.addGame})
       : super(key: key);
 
   final String cardName;
   final List<String> entries;
+  final Function addGame;
 
   @override
   createState() => CardConfigPageState();
@@ -139,11 +143,12 @@ class CardConfigPageState extends State<CardConfigPage> {
   }
 
   void _startGame() {
+    BingoCard card = BingoCard.createFromLines(
+        widget.entries.toList(), _selectedSize, _useFreeField)!;
+    widget.addGame.call(card, widget.cardName);
+    Navigator.of(context).pop();
     Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return BingoPage(
-          card: BingoCard.createFromLines(
-              widget.entries.toList(), _selectedSize, _useFreeField)!,
-          setName: widget.cardName);
+      return BingoPage(card: card, setName: widget.cardName);
     }));
   }
 }

@@ -1,3 +1,5 @@
+import 'package:buzzword_bingo/bingo_card.dart';
+import 'package:buzzword_bingo/bingo_page.dart';
 import 'package:buzzword_bingo/bingo_sets.dart';
 import 'package:buzzword_bingo/card_config_page.dart';
 import 'package:buzzword_bingo/imprint.dart';
@@ -15,10 +17,13 @@ class MainPage extends StatefulWidget {
 }
 
 class MainPageState extends State<MainPage> {
-  final List<Container> _setTiles = List.empty(growable: true);
-  final List<String> _availableNames = List.empty(growable: true);
-  final List<int> _setIndices = List.empty(growable: true);
-  int _tileID = 0;
+  final Map<int, Container> _setContainers = <int, Container>{};
+  final Map<int, String> _setNames = <int, String>{};
+  final Map<int, Container> _gameContainers = <int, Container>{};
+  final Map<int, BingoCard> _games = <int, BingoCard>{};
+
+  int _setID = 0;
+  int _gameID = 0;
 
   @override
   void initState() {
@@ -48,16 +53,18 @@ class MainPageState extends State<MainPage> {
                 onPressed: () async {
                   await Navigator.of(context)
                       .push(MaterialPageRoute(builder: ((context) {
-                    return EditSetPage(reloadCallback: () => _loadAllSets());
-                  }))).whenComplete(() => _loadAllSets());
+                    return EditSetPage(reloadCallback: _loadAllSets);
+                  }))).whenComplete(_loadAllSets);
                 })
           ],
         ),
         body: ListView.builder(
-            itemCount: max(_setTiles.length * 2 - 1, 0),
+            itemCount: max(
+                (_setContainers.length + _gameContainers.length) * 2 - 1, 0),
             itemBuilder: (context, index) {
               if (index.isOdd) return const Divider();
-              return _setTiles[index ~/ 2];
+              return (_gameContainers.values.toList() +
+                  _setContainers.values.toList())[index ~/ 2];
             }));
   }
 
@@ -97,41 +104,39 @@ class MainPageState extends State<MainPage> {
   Future<void> _loadAllSets() async {
     List<String> setNames = await BingoSets.allSets;
     for (String name in setNames) {
-      if (!_availableNames.contains(name)) {
+      if (!_setNames.containsValue(name)) {
         setState(() {
-          _reloadAllTiles(setNames);
+          _reloadAllSets(setNames);
         });
         return;
       }
     }
-    for (String name in _availableNames) {
+    for (String name in _setNames.values) {
       if (!setNames.contains(name)) {
         setState(() {
-          _reloadAllTiles(setNames);
+          _reloadAllSets(setNames);
         });
         break;
       }
     }
   }
 
-  void _addTile(String name) {
-    _availableNames.add(name);
-    _setIndices.add(_tileID);
-    _setTiles.add(_makeSetTile(name, _tileID));
-    _tileID++;
+  void _addSet(String name) {
+    _setContainers.putIfAbsent(_setID, () => _makeSetTile(name, _setID));
+    _setNames.putIfAbsent(_setID, () => name);
+    _setID++;
   }
 
-  void _reloadAllTiles(List<String> names) {
-    _availableNames.clear();
-    _setTiles.clear();
-    _setIndices.clear();
+  void _reloadAllSets(List<String> names) {
+    _setContainers.clear();
+    _setNames.clear();
     for (String name in names) {
-      _addTile(name);
+      _addSet(name);
     }
   }
 
   Future<void> _playSet(int id) async {
-    String setName = _availableNames.elementAt(_setIndices.indexOf(id));
+    String setName = _setNames[id]!;
     List<String>? entries = await BingoSets.getSet(setName);
     bool none = entries == null || entries.isEmpty;
     if (entries == null || entries.length < 9) {
@@ -150,48 +155,105 @@ class MainPageState extends State<MainPage> {
             );
           });
     } else {
-      Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-        return CardConfigPage(cardName: setName, entries: entries);
-      }));
+      Navigator.of(context).push(
+        MaterialPageRoute(
+          builder: (context) {
+            return CardConfigPage(
+              cardName: setName,
+              entries: entries,
+              addGame: _addGame,
+            );
+          },
+        ),
+      );
     }
   }
 
   Future<void> _editSet(int id) async {
-    String setName = _availableNames.elementAt(_setIndices.indexOf(id));
+    String setName = _setNames[id]!;
     List<String>? entries = await BingoSets.getSet(setName);
-    Navigator.of(context).push(MaterialPageRoute(
-      builder: (context) {
-        return EditSetPage(
-          reloadCallback: () => _loadAllSets(),
-          oldSetEntries: entries,
-          oldSetName: setName,
-        );
-      },
-    ));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return EditSetPage(
+            reloadCallback: _loadAllSets,
+            oldSetEntries: entries,
+            oldSetName: setName,
+          );
+        },
+      ),
+    );
   }
 
   Future<void> _deleteSet(int id) async {
-    String setName = _availableNames.elementAt(_setIndices.indexOf(id));
+    String setName = _setNames[id]!;
     return showDialog(
-        context: context,
-        builder: (context) {
-          return AlertDialog(
-            title: const Text('Delete set'),
-            content:
-                Text('Are you sure you want to delete the set "$setName"?'),
-            actions: <Widget>[
-              TextButton(
-                  onPressed: () => Navigator.pop(context),
-                  child: const Text('Cancel')),
-              TextButton(
-                  onPressed: () {
-                    BingoSets.deleteSet(setName)
-                        .whenComplete(() => _loadAllSets());
-                    Navigator.pop(context);
-                  },
-                  child: const Text('Delete'))
-            ],
-          );
-        });
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: const Text('Delete set'),
+          content: Text('Are you sure you want to delete the set "$setName"?'),
+          actions: <Widget>[
+            TextButton(
+                onPressed: () => Navigator.pop(context),
+                child: const Text('Cancel')),
+            TextButton(
+              onPressed: () {
+                BingoSets.deleteSet(setName).whenComplete(_loadAllSets);
+                Navigator.pop(context);
+              },
+              child: const Text('Delete'),
+            )
+          ],
+        );
+      },
+    );
+  }
+
+  void _addGame(BingoCard game, String setName) {
+    setState(() {
+      _games.putIfAbsent(_gameID, () => game);
+      _gameContainers.putIfAbsent(
+          _gameID, () => _makeGameTile(game, setName, _gameID));
+      _gameID++;
+    });
+  }
+
+  Container _makeGameTile(BingoCard game, String name, int id) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
+      child: GestureDetector(
+        onTap: () => Navigator.of(context).push(
+          MaterialPageRoute(
+              builder: (context) => BingoPage(card: game, setName: name)),
+        ),
+        child: Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Expanded(
+              child: Text(
+                'Resume: $name, size ${game.size()}',
+                style: const TextStyle(fontSize: 20),
+              ),
+            ),
+            Row(
+              children: [
+                IconButton(
+                  onPressed: () => _deleteGame(id),
+                  icon: const Icon(Icons.cancel_outlined),
+                )
+              ],
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+
+  void _deleteGame(int id) {
+    setState(() {
+      _gameContainers.remove(id);
+      _games.remove(id);
+    });
   }
 }
