@@ -189,24 +189,22 @@ class MainPageState extends State<MainPage> {
     String setName = _setNames[id]!;
     return showDialog(
       context: context,
-      builder: (context) {
-        return AlertDialog(
-          title: const Text('Delete set'),
-          content: Text('Are you sure you want to delete the set "$setName"?'),
-          actions: <Widget>[
-            TextButton(
-                onPressed: () => Navigator.pop(context),
-                child: const Text('Cancel')),
-            TextButton(
-              onPressed: () {
-                BingoSets.deleteSet(setName).whenComplete(_loadAllSets);
-                Navigator.pop(context);
-              },
-              child: const Text('Delete'),
-            )
-          ],
-        );
-      },
+      builder: (context) => AlertDialog(
+        title: const Text('Delete set'),
+        content: Text('Are you sure you want to delete the set "$setName"?'),
+        actions: <Widget>[
+          TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('Cancel')),
+          TextButton(
+            onPressed: () {
+              BingoSets.deleteSet(setName).whenComplete(_loadAllSets);
+              Navigator.pop(context);
+            },
+            child: const Text('Delete'),
+          )
+        ],
+      ),
     );
   }
 
@@ -223,10 +221,7 @@ class MainPageState extends State<MainPage> {
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 5, 0, 5),
       child: GestureDetector(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(
-              builder: (context) => BingoPage(card: game, setName: name)),
-        ),
+        onTap: () => _resumeGame(id, name),
         child: Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
@@ -239,9 +234,33 @@ class MainPageState extends State<MainPage> {
             Row(
               children: [
                 IconButton(
-                  onPressed: () => _deleteGame(id),
+                  onPressed: () => showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Stop game'),
+                      content: Text(
+                          'Are you sure you want to stop this game of $name?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.of(context).pop(),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _deleteGame(id);
+                            Navigator.of(context).pop();
+                          },
+                          child: const Text('Stop game'),
+                        ),
+                      ],
+                    ),
+                  ),
                   icon: const Icon(Icons.cancel_outlined),
-                )
+                ),
+                IconButton(
+                  onPressed: () => _resumeGame(id, name),
+                  icon: const Icon(Icons.keyboard_arrow_right),
+                ),
               ],
             ),
           ],
@@ -255,5 +274,14 @@ class MainPageState extends State<MainPage> {
       _gameContainers.remove(id);
       _games.remove(id);
     });
+  }
+
+  void _resumeGame(int id, String name) {
+    BingoCard game = _games[id]!;
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) => BingoPage(card: game, setName: name),
+      ),
+    );
   }
 }
