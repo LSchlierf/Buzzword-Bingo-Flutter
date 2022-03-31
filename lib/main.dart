@@ -11,19 +11,18 @@ class BingoApp extends StatelessWidget {
     brightness: Brightness.dark,
   );
   @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      title: 'Buzzword Bingo',
-      theme: theme.copyWith(
-        colorScheme: theme.colorScheme.copyWith(
-          brightness: Brightness.dark,
-          secondary: Colors.blue,
-        ),
-      ),
-      home: MainPage(
-        key: key,
+  Widget build(BuildContext context) => MaterialApp(
         title: 'Buzzword Bingo',
-      ),
-    );
-  }
+        theme: theme.copyWith(
+          colorScheme: theme.colorScheme.copyWith(
+            brightness: Brightness.dark,
+            secondary: Colors.blue,
+          ),
+        ),
+        home: MainPage(
+          key: key,
+          title: 'Buzzword Bingo',
+        ),
+        debugShowCheckedModeBanner: false,
+      );
 }
