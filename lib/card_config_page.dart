@@ -147,8 +147,7 @@ class CardConfigPageState extends State<CardConfigPage> {
     BingoCard card = BingoCard.createFromLines(
         widget.entries.toList(), _selectedSize, _useFreeField)!;
     widget.addGame.call(card, widget.cardName);
-    Navigator.of(context).pop();
-    Navigator.of(context).push(
+    Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) {
           return BingoPage(card: card, setName: widget.cardName);
