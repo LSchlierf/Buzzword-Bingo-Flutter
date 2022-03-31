@@ -82,19 +82,20 @@ class CardConfigPageState extends State<CardConfigPage> {
                     style: TextStyle(fontSize: 20),
                   ),
                   Checkbox(
-                      activeColor: Colors.blue,
-                      value: _useFreeField,
-                      onChanged: (newValue) {
-                        setState(() {
-                          _useFreeField = newValue!;
-                          if (!_useFreeField &&
-                                  _isDifferent &&
-                                  _selectedSize == _maxSizeWithFree ||
-                              _selectedSize.isEven) {
-                            _selectedSize--;
-                          }
-                        });
-                      }),
+                    activeColor: Colors.blue,
+                    value: _useFreeField,
+                    onChanged: (newValue) {
+                      setState(() {
+                        _useFreeField = newValue!;
+                        if (!_useFreeField &&
+                                _isDifferent &&
+                                _selectedSize == _maxSizeWithFree ||
+                            _selectedSize.isEven) {
+                          _selectedSize--;
+                        }
+                      });
+                    },
+                  ),
                 ],
               ),
             ),
@@ -147,8 +148,12 @@ class CardConfigPageState extends State<CardConfigPage> {
         widget.entries.toList(), _selectedSize, _useFreeField)!;
     widget.addGame.call(card, widget.cardName);
     Navigator.of(context).pop();
-    Navigator.of(context).push(MaterialPageRoute(builder: (context) {
-      return BingoPage(card: card, setName: widget.cardName);
-    }));
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (context) {
+          return BingoPage(card: card, setName: widget.cardName);
+        },
+      ),
+    );
   }
 }

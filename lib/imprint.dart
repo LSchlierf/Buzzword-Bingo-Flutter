@@ -15,7 +15,7 @@ class Imprint extends StatelessWidget {
           children: const [
             Text('Copyright 2022 Lucas Schlierf'),
             Text('Contact:'),
-            Text('LucasSchlierf@Gmail.com')
+            Text('LucasSchlierf@Gmail.com'),
           ],
         ),
       ),

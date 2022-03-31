@@ -34,38 +34,44 @@ class MainPageState extends State<MainPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-        appBar: AppBar(
-          leading: IconButton(
-            onPressed: () => Navigator.of(context).push(
-              MaterialPageRoute(
-                builder: (context) => const Imprint(),
-              ),
+      appBar: AppBar(
+        leading: IconButton(
+          onPressed: () => Navigator.of(context).push(
+            MaterialPageRoute(
+              builder: (context) => const Imprint(),
             ),
-            icon: const Icon(Icons.info_outline),
           ),
-          title: Text(widget.title),
-          centerTitle: true,
-          actions: [
-            IconButton(
-                icon: const Icon(
-                  Icons.add,
-                ),
-                onPressed: () async {
-                  await Navigator.of(context)
-                      .push(MaterialPageRoute(builder: ((context) {
-                    return EditSetPage(reloadCallback: _loadAllSets);
-                  }))).whenComplete(_loadAllSets);
-                })
-          ],
+          icon: const Icon(Icons.info_outline),
         ),
-        body: ListView.builder(
-            itemCount: max(
-                (_setContainers.length + _gameContainers.length) * 2 - 1, 0),
-            itemBuilder: (context, index) {
-              if (index.isOdd) return const Divider();
-              return (_gameContainers.values.toList() +
-                  _setContainers.values.toList())[index ~/ 2];
-            }));
+        title: Text(widget.title),
+        centerTitle: true,
+        actions: [
+          IconButton(
+            icon: const Icon(
+              Icons.add,
+            ),
+            onPressed: () async {
+              await Navigator.of(context).push(
+                MaterialPageRoute(
+                  builder: (context) {
+                    return EditSetPage(reloadCallback: _loadAllSets);
+                  },
+                ),
+              ).whenComplete(_loadAllSets);
+            },
+          ),
+        ],
+      ),
+      body: ListView.builder(
+        itemCount:
+            max((_setContainers.length + _gameContainers.length) * 2 - 1, 0),
+        itemBuilder: (context, index) {
+          if (index.isOdd) return const Divider();
+          return (_gameContainers.values.toList() +
+              _setContainers.values.toList())[index ~/ 2];
+        },
+      ),
+    );
   }
 
   Container _makeSetTile(String setName, int id) {
@@ -140,20 +146,19 @@ class MainPageState extends State<MainPage> {
     List<String>? entries = await BingoSets.getSet(setName);
     bool none = entries == null || entries.isEmpty;
     if (entries == null || entries.length < 9) {
-      return showDialog(
-          context: context,
-          builder: (context) {
-            return AlertDialog(
-              title: const Text('Not enough entries'),
-              content: Text(
-                  'The set "$setName" has ${none ? 'no' : 'not enough'} entries, try adding some ${none ? '' : 'more '}to the set.'),
-              actions: [
-                TextButton(
-                    onPressed: () => Navigator.of(context).pop(),
-                    child: const Text('Okay'))
-              ],
-            );
-          });
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Not enough entries'),
+          content: Text(
+              'The set "$setName" has ${none ? 'no' : 'not enough'} entries, try adding some ${none ? '' : 'more '}to the set.'),
+          actions: [
+            TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('Okay'))
+          ],
+        ),
+      );
     } else {
       Navigator.of(context).push(
         MaterialPageRoute(
