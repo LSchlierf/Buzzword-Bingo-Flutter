@@ -6,7 +6,7 @@ import 'package:buzzword_bingo/free_bingo_tile.dart';
 class BingoCard {
   List<List<BingoTile>> tiles;
 
-  BingoCard({required this.tiles});
+  BingoCard._({required this.tiles});
 
   static BingoCard? createFromLines(
       List<String> entries, int size, bool addFree) {
@@ -28,7 +28,7 @@ class BingoCard {
         }
       }
     }
-    return BingoCard(tiles: tiles);
+    return BingoCard._(tiles: tiles);
   }
 
   bool isFinished() {
