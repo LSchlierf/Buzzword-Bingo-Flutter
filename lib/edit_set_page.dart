@@ -24,9 +24,10 @@ class EditSetPageState extends State<EditSetPage> {
   final TextEditingController _textFieldController = TextEditingController();
   bool _isTitle = false;
   bool anyChange = false;
-  final List<Widget> _entries = List.empty(growable: true);
-  final List<String> _entryTexts = List.empty(growable: true);
-  final List<int> _entryIDs = List.empty(growable: true);
+
+  final Map<int, Widget> _entryWidgets = <int, Widget>{};
+  final Map<int, String> _entryStrings = <int, String>{};
+
   String? _newSetName;
   int _tileID = 0;
   ScrollController sc = ScrollController();
@@ -55,12 +56,14 @@ class EditSetPageState extends State<EditSetPage> {
       _newSetName = _titleController.value.text;
       if (widget.oldSetName != null) {
         BingoSets.deleteSet(widget.oldSetName!).then((value) {
-          BingoSets.createSet(_newSetName!, _entryTexts).whenComplete(() {
+          BingoSets.createSet(_newSetName!, _entryStrings.values.toList())
+              .whenComplete(() {
             widget.reloadCallback.call();
           });
         });
       } else {
-        BingoSets.createSet(_newSetName!, _entryTexts).whenComplete(() {
+        BingoSets.createSet(_newSetName!, _entryStrings.values.toList())
+            .whenComplete(() {
           widget.reloadCallback.call();
         });
       }
@@ -72,7 +75,7 @@ class EditSetPageState extends State<EditSetPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text('${_entryTexts.length} entries'),
+        title: Text('${_entryStrings.length} entries'),
         centerTitle: true,
         actions: [
           IconButton(
@@ -86,7 +89,7 @@ class EditSetPageState extends State<EditSetPage> {
         child: ListView.builder(
           controller: sc,
           padding: const EdgeInsets.all(15),
-          itemCount: max(_entries.length * 2, 1),
+          itemCount: max(_entryWidgets.length * 2, 1),
           itemBuilder: (context, index) {
             if (index == 0) {
               return Padding(
@@ -105,8 +108,7 @@ class EditSetPageState extends State<EditSetPage> {
               );
             }
             if (index.isEven) return const Divider();
-            final int i = index ~/ 2;
-            return _entries[i];
+            return _entryWidgets.values.elementAt(index ~/ 2);
           },
         ),
       ),
@@ -116,9 +118,8 @@ class EditSetPageState extends State<EditSetPage> {
   void _addTile(String text) {
     setState(() {
       Widget tile = _makeEntryTile(text, _tileID);
-      _entries.add(tile);
-      _entryIDs.add(_tileID);
-      _entryTexts.add(text);
+      _entryStrings.putIfAbsent(_tileID, () => text);
+      _entryWidgets.putIfAbsent(_tileID, () => tile);
       _tileID++;
       anyChange = true;
     });
@@ -126,10 +127,8 @@ class EditSetPageState extends State<EditSetPage> {
 
   void _removeTile(int id) {
     setState(() {
-      final int index = _entryIDs.indexOf(id);
-      _entries.removeAt(index);
-      _entryIDs.removeAt(index);
-      _entryTexts.removeAt(index);
+      _entryStrings.remove(id);
+      _entryWidgets.remove(id);
       anyChange = true;
     });
   }
@@ -152,8 +151,40 @@ class EditSetPageState extends State<EditSetPage> {
               textAlign: TextAlign.left,
             ),
           ),
-          IconButton(
-              onPressed: () => _removeTile(id), icon: const Icon(Icons.delete))
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => _editEntry(id),
+                icon: const Icon(Icons.edit),
+              ),
+              IconButton(
+                onPressed: () {
+                  showDialog(
+                    context: context,
+                    builder: (context) => AlertDialog(
+                      title: const Text('Delete Entry'),
+                      content: Text(
+                          'Are you sure you want to delete the entry "${_entryStrings[id]!}"?'),
+                      actions: [
+                        TextButton(
+                          onPressed: () => Navigator.pop(context),
+                          child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                            _removeTile(id);
+                            Navigator.pop(context);
+                          },
+                          child: const Text('Delete'),
+                        ),
+                      ],
+                    ),
+                  );
+                },
+                icon: const Icon(Icons.delete),
+              ),
+            ],
+          ),
         ],
       ),
     );
@@ -199,7 +230,7 @@ class EditSetPageState extends State<EditSetPage> {
                 setState(
                   () {
                     _addEntry();
-                    Navigator.of(context).pop();
+                    Navigator.pop(context);
                   },
                 );
               },
@@ -210,7 +241,7 @@ class EditSetPageState extends State<EditSetPage> {
     );
   }
 
-  _addEntry() {
+  void _addEntry() {
     String text = _textFieldController.value.text.trim();
     if (text.isNotEmpty) {
       for (String entry in text.split("\n")) {
@@ -220,5 +251,52 @@ class EditSetPageState extends State<EditSetPage> {
     }
     sc.animateTo(sc.position.maxScrollExtent,
         duration: const Duration(seconds: 2), curve: Curves.ease);
+  }
+
+  void _editEntry(int id) {
+    _textFieldController.clear();
+    _textFieldController.text = _entryStrings[id]!;
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        actions: [
+          TextButton(
+            child: const Text('Cancel'),
+            onPressed: () {
+              setState(() {
+                Navigator.pop(context);
+              });
+            },
+          ),
+          TextButton(
+            child: const Text('Ok'),
+            onPressed: () {
+              setState(() {
+                _removeTile(id);
+                _addEntry();
+                Navigator.pop(context);
+              });
+            },
+          ),
+        ],
+        content: TextField(
+          maxLines: null,
+          expands: false,
+          autofocus: true,
+          keyboardType: TextInputType.text,
+          controller: _textFieldController,
+          decoration: const InputDecoration(hintText: "Edit Entry"),
+          onEditingComplete: () {
+            setState(
+              () {
+                _removeTile(id);
+                _addEntry();
+                Navigator.of(context).pop();
+              },
+            );
+          },
+        ),
+      ),
+    );
   }
 }
