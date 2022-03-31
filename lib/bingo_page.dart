@@ -17,8 +17,12 @@ class BingoPage extends StatefulWidget {
 }
 
 class BingoPageState extends State<BingoPage> {
+  //TODO: refactor for better card formatting plus add animation on win
   List<BingoTile> tiles = List.empty(growable: true);
-  double tileWidth = 0;
+  double _cardWidth = 0;
+
+  static const double _borderRadius = 10.0;
+  static const double _borderGap = 2.0;
 
   @override
   initState() {
@@ -28,26 +32,23 @@ class BingoPageState extends State<BingoPage> {
 
   @override
   Widget build(BuildContext context) {
-    tileWidth = min(MediaQuery.of(context).size.width.toInt(),
-            MediaQuery.of(context).size.height.toInt()) /
-        widget.card.size();
     return Scaffold(
       appBar: AppBar(
         title: Text('${widget.setName} Bingo'),
         centerTitle: true,
       ),
       body: ListView.builder(
-        padding: const EdgeInsets.all(0),
-        itemCount: (widget.card.isFinished()
-            ? (widget.card.size() + 2)
-            : (widget.card.size() + 1)),
-        itemBuilder: ((context, index) {
-          if (index < widget.card.size()) {
-            return Row(
-              children: _makeContainerList(widget.card.tiles[index]),
-            );
+        itemCount: (widget.card.isFinished() ? 3 : 2),
+        itemBuilder: (context, index) {
+          _cardWidth = min(
+                  MediaQuery.of(context).size.width,
+                  MediaQuery.of(context).size.height -
+                      Scaffold.of(context).appBarMaxHeight!)
+              .toDouble();
+          if (index == 0) {
+            return _makeBingoCardWidget(widget.card);
           }
-          if (index == widget.card.size()) {
+          if (index == 1) {
             return const Divider();
           }
           return const Center(
@@ -56,61 +57,81 @@ class BingoPageState extends State<BingoPage> {
               style: TextStyle(fontSize: 20),
             ),
           );
-        }),
+        },
       ),
     );
   }
 
-  List<Widget> _makeContainerList(List<BingoTile> tiles) {
+  Widget _makeBingoCardWidget(BingoCard card) {
+    return Container(
+      width: _cardWidth,
+      height: _cardWidth,
+      child: GridView.count(
+        crossAxisCount: card.size(),
+        shrinkWrap: true,
+        children: _makeWidgetList(card.toList()),
+      ),
+    );
+  }
+
+  List<Widget> _makeWidgetList(List<BingoTile> tiles) {
     List<Widget> result = List.empty(growable: true);
     for (BingoTile tile in tiles) {
       if (tile is FreeBingoTile) {
-        result.add(
-          Container(
-            decoration: BoxDecoration(
-              color: Colors.green,
-              border: Border.all(
-                color: Colors.black,
-              ),
-            ),
-            width: tileWidth,
-            height: tileWidth,
-            child: Icon(
-              Icons.star,
-              size: tileWidth / 2,
-            ),
-          ),
-        );
+        result.add(_makeFreeTileWidget(tile));
       } else {
-        result.add(
-          GestureDetector(
-            onTap: () {
-              setState(() {
-                tile.isMarkedOff = !tile.isMarkedOff;
-              });
-            },
-            child: Container(
-              decoration: BoxDecoration(
-                color: (tile.isMarkedOff ? Colors.green : null),
-                border: Border.all(
-                  color: Colors.black,
-                ),
-              ),
-              width: tileWidth,
-              height: tileWidth,
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-                child: Center(
-                  child: Text(
-                    tile.text,
-                  ),
-                ),
-              ),
-            ),
-          ),
-        );
+        result.add(_makeTileWidget(tile));
       }
     }
     return result;
+  }
+
+  Widget _makeTileWidget(BingoTile tile) {
+    return Container(
+      padding: const EdgeInsets.all(_borderGap),
+      child: GestureDetector(
+        onTap: () {
+          setState(() {
+            tile.isMarkedOff = !tile.isMarkedOff;
+          });
+        },
+        child: Container(
+          decoration: BoxDecoration(
+            color: (tile.isMarkedOff ? Colors.green : null),
+            border: Border.all(
+              color: Colors.black,
+            ),
+            borderRadius: BorderRadius.circular(_borderRadius),
+          ),
+          child: Padding(
+            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+            child: Center(
+              child: Text(
+                tile.text,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _makeFreeTileWidget(BingoTile tile) {
+    return Container(
+      padding: const EdgeInsets.all(_borderGap),
+      child: Container(
+        decoration: BoxDecoration(
+          color: Colors.green,
+          border: Border.all(
+            color: Colors.black,
+          ),
+          borderRadius: BorderRadius.circular(_borderRadius),
+        ),
+        child: Icon(
+          Icons.star,
+          size: _cardWidth / (2 * widget.card.size()),
+        ),
+      ),
+    );
   }
 }
