@@ -21,8 +21,8 @@ class BingoPageState extends State<BingoPage> {
   List<BingoTile> tiles = List.empty(growable: true);
   double _cardWidth = 0;
 
-  static const double _borderRadius = 10.0;
-  static const double _borderGap = 2.0;
+  static const double _borderRadius = 15.0;
+  static const double _borderGap = 15.0;
 
   @override
   initState() {
@@ -79,10 +79,13 @@ class BingoPageState extends State<BingoPage> {
   }
 
   Widget _makeBingoCardWidget(BingoCard card) {
-    return GridView.count(
-      crossAxisCount: card.size(),
-      shrinkWrap: true,
-      children: _makeWidgetList(card.toList()),
+    return Padding(
+      padding: const EdgeInsets.all(_borderGap),
+      child: GridView.count(
+        crossAxisCount: card.size(),
+        shrinkWrap: true,
+        children: _makeWidgetList(card.toList()),
+      ),
     );
   }
 
@@ -100,7 +103,7 @@ class BingoPageState extends State<BingoPage> {
 
   Widget _makeTileWidget(BingoTile tile) {
     return Container(
-      padding: const EdgeInsets.all(_borderGap),
+      // padding: const EdgeInsets.all(_borderGap),
       child: GestureDetector(
         onTap: () {
           setState(() {
@@ -113,7 +116,7 @@ class BingoPageState extends State<BingoPage> {
             border: Border.all(
               color: Colors.black,
             ),
-            borderRadius: BorderRadius.circular(_borderRadius),
+            borderRadius: _makeCornerRadius(tile.isCorner(widget.card)),
           ),
           child: Padding(
             padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
@@ -128,21 +131,41 @@ class BingoPageState extends State<BingoPage> {
     );
   }
 
+  BorderRadius _makeCornerRadius(int corner) {
+    if (corner == 1) {
+      return const BorderRadius.only(
+        topLeft: Radius.circular(_borderRadius),
+      );
+    }
+    if (corner == 2) {
+      return const BorderRadius.only(
+        topRight: Radius.circular(_borderRadius),
+      );
+    }
+    if (corner == 3) {
+      return const BorderRadius.only(
+        bottomLeft: Radius.circular(_borderRadius),
+      );
+    }
+    if (corner == 4) {
+      return const BorderRadius.only(
+        bottomRight: Radius.circular(_borderRadius),
+      );
+    }
+    return const BorderRadius.all(Radius.zero);
+  }
+
   Widget _makeFreeTileWidget(BingoTile tile) {
     return Container(
-      padding: const EdgeInsets.all(_borderGap),
-      child: Container(
-        decoration: BoxDecoration(
-          color: Colors.green,
-          border: Border.all(
-            color: Colors.black,
-          ),
-          borderRadius: BorderRadius.circular(_borderRadius),
+      decoration: BoxDecoration(
+        color: Colors.green,
+        border: Border.all(
+          color: Colors.black,
         ),
-        child: Icon(
-          Icons.star,
-          size: _cardWidth / (2 * widget.card.size()),
-        ),
+      ),
+      child: Icon(
+        Icons.star,
+        size: _cardWidth / (2 * widget.card.size()),
       ),
     );
   }
