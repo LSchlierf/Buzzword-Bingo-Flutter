@@ -5,12 +5,12 @@ import 'package:buzzword_bingo/bingo_page.dart';
 import 'package:flutter/material.dart';
 
 class CardConfigPage extends StatefulWidget {
-  const CardConfigPage(
-      {Key? key,
-      required this.cardName,
-      required this.entries,
-      required this.addGame})
-      : super(key: key);
+  const CardConfigPage({
+    Key? key,
+    required this.cardName,
+    required this.entries,
+    required this.addGame,
+  }) : super(key: key);
 
   final String cardName;
   final List<String> entries;
@@ -150,7 +150,10 @@ class CardConfigPageState extends State<CardConfigPage> {
     Navigator.of(context).pushReplacement(
       MaterialPageRoute(
         builder: (context) {
-          return BingoPage(card: card, setName: widget.cardName);
+          return BingoPage(
+            card: card,
+            setName: widget.cardName,
+          );
         },
       ),
     );

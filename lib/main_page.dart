@@ -285,7 +285,10 @@ class MainPageState extends State<MainPage> {
     BingoCard game = _games[id]!;
     Navigator.of(context).push(
       MaterialPageRoute(
-        builder: (context) => BingoPage(card: game, setName: name),
+        builder: (context) => BingoPage(
+          card: game,
+          setName: name,
+        ),
       ),
     );
   }

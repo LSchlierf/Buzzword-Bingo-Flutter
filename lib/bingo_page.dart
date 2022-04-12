@@ -6,8 +6,11 @@ import 'bingo_card.dart';
 import 'bingo_tile.dart';
 
 class BingoPage extends StatefulWidget {
-  const BingoPage({Key? key, required this.card, required this.setName})
-      : super(key: key);
+  const BingoPage({
+    Key? key,
+    required this.card,
+    required this.setName,
+  }) : super(key: key);
 
   final BingoCard card;
   final String setName;
@@ -102,28 +105,25 @@ class BingoPageState extends State<BingoPage> {
   }
 
   Widget _makeTileWidget(BingoTile tile) {
-    return Container(
-      // padding: const EdgeInsets.all(_borderGap),
-      child: GestureDetector(
-        onTap: () {
-          setState(() {
-            tile.isMarkedOff = !tile.isMarkedOff;
-          });
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            color: (tile.isMarkedOff ? Colors.green : null),
-            border: Border.all(
-              color: Colors.black,
-            ),
-            borderRadius: _makeCornerRadius(tile.isCorner(widget.card)),
+    return GestureDetector(
+      onTap: () {
+        setState(() {
+          tile.isMarkedOff = !tile.isMarkedOff;
+        });
+      },
+      child: Container(
+        decoration: BoxDecoration(
+          color: (tile.isMarkedOff ? Colors.green : Colors.white12),
+          border: Border.all(
+            color: Colors.black,
           ),
-          child: Padding(
-            padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
-            child: Center(
-              child: Text(
-                tile.text,
-              ),
+          borderRadius: _makeCornerRadius(tile.isCorner(widget.card)),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.fromLTRB(5, 0, 5, 0),
+          child: Center(
+            child: Text(
+              tile.text,
             ),
           ),
         ),
@@ -131,7 +131,7 @@ class BingoPageState extends State<BingoPage> {
     );
   }
 
-  BorderRadius _makeCornerRadius(int corner) {
+  BorderRadius? _makeCornerRadius(int corner) {
     if (corner == 1) {
       return const BorderRadius.only(
         topLeft: Radius.circular(_borderRadius),
@@ -152,7 +152,7 @@ class BingoPageState extends State<BingoPage> {
         bottomRight: Radius.circular(_borderRadius),
       );
     }
-    return const BorderRadius.all(Radius.zero);
+    return null;
   }
 
   Widget _makeFreeTileWidget(BingoTile tile) {
