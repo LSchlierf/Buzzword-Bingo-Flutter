@@ -134,7 +134,7 @@ class CardConfigPageState extends State<CardConfigPage> {
               padding: const EdgeInsets.all(10),
               child: ElevatedButton(
                 child: const Text('Let\'s go!'),
-                onPressed: () => _startGame(),
+                onPressed: _startGame,
               ),
             )
           ],
