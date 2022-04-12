@@ -45,45 +45,37 @@ class BingoPageState extends State<BingoPage> {
                       Scaffold.of(context).appBarMaxHeight!)
               .toDouble();
           return orientation == Orientation.portrait
-              ? ListView.builder(
-                  itemCount: (widget.card.isFinished() ? 3 : 2),
-                  itemBuilder: (context, index) {
-                    if (index == 0) {
-                      return _makeBingoCardWidget(widget.card);
-                    }
-                    if (index == 1) {
-                      return const Divider();
-                    }
-                    return const Center(
-                      child: Text(
-                        '🎊 Bingo! 🎊',
-                        style: TextStyle(fontSize: 20),
-                      ),
-                    );
-                  },
+              ? Column(
+                  children: _makeCardLayoutList(),
                 )
               : Row(
-                  children: [
-                    SizedBox(
-                      height: _cardWidth,
-                      width: _cardWidth,
-                      child: _makeBingoCardWidget(widget.card),
-                    ),
-                    Expanded(
-                      child: Center(
-                        child: widget.card.isFinished()
-                            ? const Text(
-                                '🎊 Bingo! 🎊',
-                                style: TextStyle(fontSize: 20),
-                              )
-                            : null,
-                      ),
-                    ),
-                  ],
+                  children: _makeCardLayoutList(),
                 );
         },
       ),
     );
+  }
+
+  List<Widget> _makeCardLayoutList() {
+    return <Widget>[
+          SizedBox(
+            height: _cardWidth,
+            width: _cardWidth,
+            child: _makeBingoCardWidget(widget.card),
+          ),
+        ] +
+        (widget.card.isFinished()
+            ? [
+                const Expanded(
+                  child: Center(
+                    child: Text(
+                      '🎊 Bingo! 🎊',
+                      style: TextStyle(fontSize: 20),
+                    ),
+                  ),
+                ),
+              ]
+            : []);
   }
 
   Widget _makeBingoCardWidget(BingoCard card) {
