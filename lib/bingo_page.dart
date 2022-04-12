@@ -17,7 +17,7 @@ class BingoPage extends StatefulWidget {
 }
 
 class BingoPageState extends State<BingoPage> {
-  //TODO: refactor for better card formatting plus add animation on win
+  //TODO: add animation on win
   List<BingoTile> tiles = List.empty(growable: true);
   double _cardWidth = 0;
 
@@ -37,40 +37,60 @@ class BingoPageState extends State<BingoPage> {
         title: Text('${widget.setName} Bingo'),
         centerTitle: true,
       ),
-      body: ListView.builder(
-        itemCount: (widget.card.isFinished() ? 3 : 2),
-        itemBuilder: (context, index) {
+      body: OrientationBuilder(
+        builder: (context, orientation) {
           _cardWidth = min(
                   MediaQuery.of(context).size.width,
                   MediaQuery.of(context).size.height -
                       Scaffold.of(context).appBarMaxHeight!)
               .toDouble();
-          if (index == 0) {
-            return _makeBingoCardWidget(widget.card);
-          }
-          if (index == 1) {
-            return const Divider();
-          }
-          return const Center(
-            child: Text(
-              '🎊 Bingo! 🎊',
-              style: TextStyle(fontSize: 20),
-            ),
-          );
+          return orientation == Orientation.portrait
+              ? ListView.builder(
+                  itemCount: (widget.card.isFinished() ? 3 : 2),
+                  itemBuilder: (context, index) {
+                    if (index == 0) {
+                      return _makeBingoCardWidget(widget.card);
+                    }
+                    if (index == 1) {
+                      return const Divider();
+                    }
+                    return const Center(
+                      child: Text(
+                        '🎊 Bingo! 🎊',
+                        style: TextStyle(fontSize: 20),
+                      ),
+                    );
+                  },
+                )
+              : Row(
+                  children: [
+                    SizedBox(
+                      height: _cardWidth,
+                      width: _cardWidth,
+                      child: _makeBingoCardWidget(widget.card),
+                    ),
+                    Expanded(
+                      child: Center(
+                        child: widget.card.isFinished()
+                            ? const Text(
+                                '🎊 Bingo! 🎊',
+                                style: TextStyle(fontSize: 20),
+                              )
+                            : null,
+                      ),
+                    ),
+                  ],
+                );
         },
       ),
     );
   }
 
   Widget _makeBingoCardWidget(BingoCard card) {
-    return Container(
-      width: _cardWidth,
-      height: _cardWidth,
-      child: GridView.count(
-        crossAxisCount: card.size(),
-        shrinkWrap: true,
-        children: _makeWidgetList(card.toList()),
-      ),
+    return GridView.count(
+      crossAxisCount: card.size(),
+      shrinkWrap: true,
+      children: _makeWidgetList(card.toList()),
     );
   }
 
